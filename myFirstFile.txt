@@ -1,2 +1,3 @@
 Hello. This is my first file.
 I am adding this second line.
+This is my 3rd line.
