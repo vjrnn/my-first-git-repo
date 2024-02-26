@@ -1,4 +1,4 @@
-global:
+abcglobal:
   imageCredentials:
       registry:
           url: "ccd.registry:5000"
