@@ -1,0 +1,1470 @@
+global:
+  imageCredentials:
+      registry:
+          url: "ccd.registry:5000"
+  pullSecret: regcred
+  registry:
+    url: "ccd.registry:5000"
+  timezone: CET
+  applicationId: ep5g-pcx
+  ericObjectStorageTls:
+    secretName: eric-pc-ep5g-object-storage-mn
+  ericsson:
+    licensing:
+      licenseDomains:
+      - customerId: '962353'
+        productType: PACKET_CORE_GATEWAY
+        swltId: 962353_FR48_PCG
+      - customerId: '962353'
+        productType: PACKET_CORE_CONTROLLER
+        swltId: 962353_FR48_PCC
+  interfacePrefixes:
+  - name: 'cre:'
+    owner: cre
+  - name: 'up:'
+    owner: up
+  log:
+    outputs:
+    - k8sLevel
+  objectStorage:
+    credentials:
+      kubernetesSecretName: eric-pc-ep5g-object-storage-mn
+  pcfw:
+    enabled: false
+  security:
+    createPolicyRole: false
+    tls:
+      enabled: true
+  sm:
+    pgw:
+      enabled: true
+    sgw:
+      enabled: true
+    smf:
+      enabled: true
+eric-odca-diagnostic-data-collector:
+  sftpCredentials:
+    password: password
+    username: username
+eric-pc-controller:
+  enabled: true
+  eric-pc-controller-ldap-admin-creds:
+    adminCredentials:
+      adminuser: admin
+      adminpasswd: "$6$bbGrEAfDSK6bKtzi$4hRLL0Ug9VhFPUsZmPic0yc6prO3LcgxLvrey6Z9ABlIOMTqtGA3k/3ZFBpseFRSBGIB.dsECYFR6q4Mek.0S0" 
+  eric-cloud-native-base:
+    enabled: true
+    eric-cm-mediator:
+      backend:
+        hostname: eric-cm-mediator-db-pg
+      enabled: true
+      kafka:
+        hostname: eric-data-message-bus-kf
+        port: 9092
+      tolerations:
+        eric-cm-mediator-notifier:
+        - effect: NoExecute
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+          tolerationSeconds: 60
+        - effect: NoExecute
+          key: node.kubernetes.io/unreachable
+          operator: Exists
+          tolerationSeconds: 0
+    eric-cm-mediator-db-pg:
+      brAgent:
+        enabled: false
+      enabled: true
+      persistentVolumeClaim:
+        enabled: true
+      postgresConfig:
+        huge_pages: 'off'
+        max_connections: 400
+      postgresDatabase: adp_gs_cm
+      probes:
+        metrics:
+          livenessProbe:
+            initialDelaySeconds: 240
+        postgres:
+          livenessProbe:
+            initialDelaySeconds: 240
+      service:
+        endpoints:
+          postgres:
+            tls:
+              enforced: required
+    eric-ctrl-bro:
+      enabled: false
+    eric-data-coordinator-zk:
+      enabled: true
+      persistence:
+        persistentVolumeClaim:
+          enabled: true
+      service:
+        endpoints:
+          datacoordinatorzk:
+            tls:
+              enforced: optional
+    eric-data-distributed-coordinator-ed:
+      brAgent:
+        backupTypeList: []
+        enabled: false
+      enabled: true
+      metricsexporter:
+        enabled: false
+      persistence:
+        persistentVolumeClaim:
+          size: 5Gi
+      service:
+        endpoints:
+          dced:
+            acls:
+              adminSecret: eric-pc-ep5g-data-distributed-coordinator-secret
+            metrics:
+              enabled: false
+      tolerations:
+        dced:
+        - effect: NoExecute
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+          tolerationSeconds: 30
+        - effect: NoExecute
+          key: node.kubernetes.io/unreachable
+          operator: Exists
+          tolerationSeconds: 0
+    eric-data-document-database-pg:
+      enabled: false
+    eric-data-message-bus-kf:
+      configurationOverrides:
+        log.retention.hours: 24
+        zookeeper.connection.timeout.ms: 90000
+      enabled: true
+      probes:
+        messagebuskf:
+          livenessProbe:
+            initialDelaySeconds: 180
+      service:
+        endpoints:
+          messagebuskf:
+            tls:
+              verifyClientCertificate: optional
+    eric-data-object-storage-mn:
+      affinity:
+        podAntiAffinity: soft
+      autoEncryption:
+        enabled: true
+      brAgent:
+        enabled: false
+      credentials:
+        kubernetesSecretName: eric-pc-ep5g-object-storage-mn
+      enabled: true
+      lifecycle:
+        configMap: lifecycle-config
+        mcHost: s3
+      objects_lifecycle_cfg: |
+        #!/bin/bash
+
+        mc mb $MC_HOST/eric-pc-mm-itc
+        eosc set life-cycle-rule bucket eric-pc-mm-itc expire 1 --lfid="ITC logs retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-mm-ebm
+        eosc set life-cycle-rule bucket eric-pc-mm-ebm expire 1 --lfid="EBM logs retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-mm-ue-trace
+        eosc set life-cycle-rule bucket eric-pc-mm-ue-trace expire 1 --lfid="UE Trace logs retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-mm-sctp
+        eosc set life-cycle-rule bucket eric-pc-mm-sctp expire 1 --lfid="SCTP Status logs retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-mm-ctum
+        eosc set life-cycle-rule bucket eric-pc-mm-ctum expire 1 --lfid="CTUM logs retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-mm-mdt-mapping-log
+        eosc set life-cycle-rule bucket eric-pc-mm-mdt-mapping-log expire 1 --lfid="MDT Mapping logs retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-mm-pm-jobs
+        eosc set life-cycle-rule bucket eric-pc-mm-pm-jobs expire 1 --lfid="PM Job ROP files retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-mm-support-package
+        eosc set life-cycle-rule bucket eric-pc-mm-support-package expire 1 --lfid="Support package files retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-mm-dnsapp
+        eosc set life-cycle-rule bucket eric-pc-mm-dnsapp expire 1 --lfid="DNS application data files retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-mm-coredump
+        eosc set life-cycle-rule bucket eric-pc-mm-coredump expire 7 --lfid="Coredumps files retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-mm-erlang-trace
+        eosc set life-cycle-rule bucket eric-pc-mm-erlang-trace expire 1 --lfid="Erlang trace logs retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-mm-procinfo
+        eosc set life-cycle-rule bucket eric-pc-mm-procinfo expire 1 --lfid="OS process related info files retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-mm-ss7config
+        eosc set life-cycle-rule bucket eric-pc-mm-ss7config expire 1 --lfid="Non-checkpointed SS7 config files retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-controller-data
+
+        mc mb $MC_HOST/eric-pc-sm-cdr
+        eosc set life-cycle-rule bucket eric-pc-sm-cdr expire 365 --lfid="PGW-C SGW-C Charging Data Records retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-pgw-cdr
+        eosc set life-cycle-rule bucket eric-pc-sm-pgw-cdr expire 365 --lfid="PGW-C Charging Data Records retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-sgw-cdr
+        eosc set life-cycle-rule bucket eric-pc-sm-sgw-cdr expire 365 --lfid="SGW-C Charging Data Records retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-gtppcdr
+        eosc set life-cycle-rule bucket eric-pc-sm-gtppcdr expire 365 --lfid="PGW-C GTP Prime Charging Data Records retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-pgw-gtppcdr
+        eosc set life-cycle-rule bucket eric-pc-sm-pgw-gtppcdr expire 365 --lfid="PGW-C GTP Prime Charging Data Records retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-gyccr
+        eosc set life-cycle-rule bucket eric-pc-sm-gyccr expire 365 --lfid="PGW-C Gy Credit Control Records retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-rfcdr
+        eosc set life-cycle-rule bucket eric-pc-sm-rfcdr expire 365 --lfid="PGW-C SGW-C RF Accounting Control Records retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-smf-charging-messages
+        eosc set life-cycle-rule bucket eric-pc-sm-smf-charging-messages expire 365 --lfprefix=retention/ready --lfid="SMF Charging Ready subfolder, Operator should move these to collected subfolder" --lfstatus=Enabled
+        eosc set life-cycle-rule bucket eric-pc-sm-smf-charging-messages expire 7   --lfprefix=retention/collected --lfid="SMF Charging Collected subfolder, Items deleted after 7 days" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-coredump
+        eosc set life-cycle-rule bucket eric-pc-sm-coredump expire 7 --lfid="PC SM core dumps retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-troubleshoot
+        eosc set life-cycle-rule bucket eric-pc-sm-troubleshoot expire 1 --lfid="PC SM trouble-shooting retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-cfg
+
+        mc mb $MC_HOST/eric-pc-sm-fm
+
+        mc mb $MC_HOST/eric-pc-sm-lm
+
+        mc mb $MC_HOST/eric-pc-sm-nrf-cache
+
+        mc mb $MC_HOST/eric-pc-sm-memorytracker-data
+        eosc set life-cycle-rule bucket eric-pc-sm-memorytracker expire 7 --lfid="PC SM memory tracker data retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-support-package
+        eosc set life-cycle-rule bucket eric-pc-sm-support-package expire 1 --lfid="PC SM support package retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-uetrace
+        eosc set life-cycle-rule bucket eric-pc-sm-uetrace expire 1 --lfid="PC SM UE Trace logs retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pc-sm-itc
+        eosc set life-cycle-rule bucket eric-pc-sm-itc expire 1 --lfid="PC SM ITC logs retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/eric-pmbr-rop-file-store
+        eosc set life-cycle-rule bucket eric-pmbr-rop-file-store expire 1 --lfid="PM Bulk Reporter ROP files retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/coredump
+        eosc set life-cycle-rule bucket coredump expire 7 --lfid="routing node crash dump files retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/heuristics
+
+        mc mb $MC_HOST/itc
+        eosc set life-cycle-rule bucket itc expire 1 --lfid="itc files retention" --lfstatus=Enabled
+
+        mc mb $MC_HOST/dropfifo
+        eosc set life-cycle-rule bucket dropfifo expire 1 --lfstatus=Enabled
+        mc mb $MC_HOST/dropfifo
+        mc mb $MC_HOST/uetrace
+        eosc set life-cycle-rule bucket uetrace expire 1 --lfstatus=Enabled
+      persistentVolumeClaim:
+        size: 58Gi
+        storageClassName: ''
+      probes:
+        mgt:
+          livenessProbe:
+            timeoutSeconds: 15
+          readinessProbe:
+            timeoutSeconds: 15
+        server:
+          livenessProbe:
+            timeoutSeconds: 15
+          readinessProbe:
+            timeoutSeconds: 15
+    eric-data-search-engine:
+      enabled: true
+      persistence:
+        data:
+          persistentVolumeClaim:
+            size: 35Gi
+    eric-data-search-engine-curator:
+      actions: |
+        1:
+          action: delete_indices
+          description: >-
+            Delete indices older than 24 hours (based on index name), for indices
+            that might contain sensitive information.
+            Ignore the error if the filter does not result in an actionable list
+            of indices(ignore_empty_list) and exit cleanly.
+          options:
+            ignore_empty_list: True
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^(pc-mm-(worker-report|list-subscriber-result|gf-imeicheck|n17-pei-check)|adp-app-debug)-(log|logs).*$'
+          - filtertype: age
+            source: name
+            direction: older
+            timestring: '%Y.%m.%d'
+            unit: days
+            unit_count: 1
+        2:
+          action: delete_indices
+          description: >-
+            Delete indices older than 7 days (based on index name), for pc-sm, pc-mm, pc-routing-app
+            and vpn-gw-app prefixed indices. Ignore the error if the filter does not result in an
+            actionable list of indices (ignore_empty_list) and exit cleanly.
+          options:
+            ignore_empty_list: True
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^(pc-mm-.*|pc-routing-app|vpn-gw-app|adp-app)-(log|logs)-.*$'
+          - filtertype: pattern
+            kind: regex
+            value: '^pc-mm-(worker-report|list-subscriber-result|gf-imeicheck|n17-pei-check)-log.*$'
+            exclude: True
+          - filtertype: age
+            source: name
+            direction: older
+            timestring: '%Y.%m.%d'
+            unit: days
+            unit_count: 7
+        3:
+          action: delete_indices
+          description: >-
+            Delete indices older than 30 days (based on index name), for audit log
+            and alarm log prefixed indices. Ignore the error if the filter does
+            not result in an actionable list of indices (ignore_empty_list) and exit cleanly.
+          options:
+            ignore_empty_list: True
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^adp-app-(audit|alarm|security|asi)-logs.*$'
+          - filtertype: age
+            source: name
+            direction: older
+            timestring: '%Y.%m.%d'
+            unit: days
+            unit_count: 30
+        4:
+          action: delete_indices
+          description: >-
+            Delete indices older than 120 days (based on index name), for isp log
+            prefixed indices. Ignore the error if the filter does not result in
+            an actionable list of indices (ignore_empty_list) and exit cleanly.
+          options:
+            ignore_empty_list: True
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^(isp-logs).*$'
+          - filtertype: age
+            source: name
+            direction: older
+            timestring: '%Y.%m.%d'
+            unit: days
+            unit_count: 120
+        5:
+          action: delete_indices
+          description: >-
+            Delete indices older than 1000 days (based on index name), for state log
+            prefixed indices. Ignore the error if the filter does not result in
+            an actionable list of indices (ignore_empty_list) and exit cleanly.
+          options:
+            ignore_empty_list: True
+            timeout_override:
+            continue_if_exception: False
+            disable_action: False
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^(state-logs).*$'
+          - filtertype: age
+            source: field_stats
+            direction: older
+            field: '@timestamp'
+            stats_result: max_value
+            unit: days
+            unit_count: 1000
+        6:
+          action: delete_indices
+          description: >-
+            Delete older indices when the total space is greater than upper limit,
+            for debug log prefixed indices. Ignore the error if the filter does not
+            result in an actionable list of indices (ignore_empty_list) and exit
+            cleanly.
+          options:
+            ignore_empty_list: True
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^adp-app-debug-logs.*$'
+          - filtertype: space
+            disk_space: 1
+            use_age: true
+            source: creation_date
+        7:
+          action: delete_indices
+          description: >-
+            Delete older indices when the total space is greater than upper limit,
+            for isp log prefixed indices. Ignore the error if the filter does not
+            result in an actionable list of indices (ignore_empty_list) and exit
+            cleanly.
+          options:
+            ignore_empty_list: True
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^(isp-logs).*$'
+          - filtertype: space
+            disk_space: 1
+            use_age: true
+            source: creation_date
+        8:
+          action: delete_indices
+          description: >-
+            Delete older indices when the total space is greater than upper limit, for isp log
+            and vpn gw app log prefixed indices. Ignore the error if the filter does not result
+            in an actionable list of indices (ignore_empty_list) and exit cleanly.
+          options:
+            ignore_empty_list: True
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^(vpn-gw-app-log).*$'
+          - filtertype: space
+            disk_space: 1
+            use_age: true
+            source: creation_date
+        9:
+          action: delete_indices
+          description: >-
+            Delete older indices when the total space is greater than upper limit, for audit log
+            and alarm log prefixed indices. Ignore the error if the filter does not result in an
+            actionable list of indices (ignore_empty_list) and exit cleanly.
+          options:
+            ignore_empty_list: True
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^adp-app-(audit|asi|security|alarm)-logs.*$'
+          - filtertype: space
+            disk_space: 1
+            use_age: true
+            source: creation_date
+
+        10:
+          action: delete_indices
+          description: >-
+            Delete older indices when the total space is greater than upper limit, for
+            pc-routing-app-log prefixed indices. Ignore the error if the filter does not result in an
+            actionable list of indices (ignore_empty_list) and exit cleanly.
+          options:
+            ignore_empty_list: True
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^(pc-routing-app-log).*$'
+          - filtertype: space
+            disk_space: 2
+            use_age: true
+            source: creation_date
+        11:
+          action: delete_indices
+          description: >-
+            Delete older indices when the total space is greater than upper limit,
+            for systemlog prefixed indices. Ignore the error if the filter does not
+            result in an actionable list of indices (ignore_empty_list) and exit
+            cleanly.
+          options:
+            ignore_empty_list: True
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^adp-app-logs.*$'
+          - filtertype: space
+            disk_space: 3
+            use_age: true
+            source: creation_date
+        12:
+          action: delete_indices
+          description: >-
+            Delete older indices when the total space is greater than upper limit, for pc-mm and
+            pc-sm prefixed indices. Ignore the error if the filter does not result in an
+            actionable list of indices (ignore_empty_list) and exit cleanly.
+          options:
+            ignore_empty_list: True
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^(pc-mm-.*)-log.*$'
+          - filtertype: space
+            disk_space: 5
+            use_age: true
+            source: creation_date
+        13:
+          action: delete_indices
+          description: >-
+            Delete older indices when the total space is greater than upper limit, for common service
+            prefixed indices. Ignore the error if the filter does not result in an
+            actionable list of indices (ignore_empty_list) and exit cleanly.
+          options:
+            ignore_empty_list: True
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^(adp-app-logs|pcc-kvdbrd-app-log).*$'
+          - filtertype: space
+            disk_space: 15
+            use_age: true
+            source: creation_date
+
+        14:
+          action: delete_indices
+          description: >-
+            Delete older indices when the total space is greater than upper limit, for isp log
+            and vpn gw app log prefixed indices. Ignore the error if the filter does not result
+            in an actionable list of indices (ignore_empty_list) and exit cleanly.
+          options:
+            ignore_empty_list: True
+          filters:
+          - filtertype: pattern
+            kind: regex
+            value: '^(vpn-gw-app-log).*$'
+          - filtertype: space
+            disk_space: 1
+            use_age: true
+            source: creation_date
+      enabled: true
+      logLevel: warning
+    eric-fh-alarm-handler:
+      alarmhandler:
+        configmap:
+          faultmappings: eric-pc-ep5g-alarm-handler-faultmappings
+        rest:
+          fi:
+            api:
+              enabled: true
+      backend:
+        hostname: eric-fh-alarm-handler-db-pg
+      enabled: true
+      probes:
+        alarmHandler:
+          readinessProbe:
+            failureThreshold: 30
+    eric-fh-alarm-handler-db-pg:
+      brAgent:
+        enabled: false
+      enabled: true
+      postgresConfig:
+        huge_pages: 'off'
+      postgresDatabase: adp_gs_ah
+      probes:
+        metrics:
+          livenessProbe:
+            initialDelaySeconds: 240
+        postgres:
+          livenessProbe:
+            initialDelaySeconds: 240
+      service:
+        endpoints:
+          postgres:
+            tls:
+              enforced: required
+    eric-fh-snmp-alarm-provider:
+      enabled: true
+      probes:
+        snmpAP:
+          livenessProbe:
+            failureThreshold: 18
+            initialDelaySeconds: 180
+      service:
+        loadBalancerIP: 10.81.10.64
+        annotations:
+          sharedVIPLabel: "vip_pool_oam"
+          addressPoolName: "vip_pool_oam"
+        secretName: eric-pc-ep5g-snmp-alarm-provider-config
+    eric-lm-combined-server:
+      database:
+        host: eric-lm-combined-server-db-pg
+        name: adp_gs_lm
+        tls:
+          enforced: required
+      enabled: true
+      licenseConsumerHandler:
+        service:
+          endpoints:
+            externalHttps:
+              tls:
+                enforced: optional
+      licenseServerClient:
+        licenseServer:
+          thrift:
+            host: 10.81.10.254
+        logLevel: info
+        timer:
+          licenseRequestAggregationPeriod: 3600
+          peakUsageReportAggregationPeriod: 60
+      probes:
+        eric-lm-license-consumer-handler:
+          livenessProbe:
+            initialDelaySeconds: 60
+        eric-lm-license-server-client:
+          livenessProbe:
+            initialDelaySeconds: 60
+      tolerations:
+        licenseServerClient:
+        - effect: NoExecute
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+          tolerationSeconds: 60
+        - effect: NoExecute
+          key: node.kubernetes.io/unreachable
+          operator: Exists
+          tolerationSeconds: 0
+    eric-lm-combined-server-db-pg:
+      brAgent:
+        enabled: false
+      enabled: true
+      persistentVolumeClaim:
+        enabled: true
+      postgresConfig:
+        huge_pages: 'off'
+      postgresDatabase: adp_gs_lm
+      probes:
+        metrics:
+          livenessProbe:
+            initialDelaySeconds: 240
+        postgres:
+          livenessProbe:
+            initialDelaySeconds: 240
+      service:
+        endpoints:
+          postgres:
+            tls:
+              enforced: required
+    eric-log-shipper:
+      additionalVolumeMounts: |
+        - name: docker-containers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: kubernetes-containers
+          mountPath: /var/log/containers
+          readOnly: true
+        - name: kubernetes-pods
+          mountPath: /var/log/pods
+          readOnly: true
+      additionalVolumes: |
+        - name: docker-containers
+          hostPath:
+            path: /var/lib/docker/containers
+        - name: kubernetes-containers
+          hostPath:
+            path: /var/log/containers
+        - name: kubernetes-pods
+          hostPath:
+            path: /var/log/pods
+      enabled: true
+      logshipper:
+        cfgData: |
+          paths:
+            # Note that these are not regexps but Go globs.
+            - /var/log/containers/eric-pc-mm-controller-*_.RELEASE.NAMESPACE_*.log
+            - /var/log/containers/eric-pc-mm-forwarder-*_.RELEASE.NAMESPACE_*.log
+            - /var/log/containers/eric-pc-mm-mobility-*_.RELEASE.NAMESPACE_*.log
+            - /var/log/containers/eric-pc-mm-sctp-*_.RELEASE.NAMESPACE_*.log
+          symlinks: true
+
+          # These containers/microservices do not follow the ADP Design rules
+          # to log directly as JSON.
+
+          paths:
+            - /var/log/containers/eric-pc-mm-*.log
+          exclude_files:
+            - 'eric-pc-mm-(controller|forwarder|mobility|sctp)-.*\.log'
+          fields:
+            logplane: pc-mm-app-log
+          symlinks: true
+
+          paths:
+            - /var/log/containers/eric-*_.RELEASE.NAMESPACE_*.log
+          exclude_files:
+            - /var/log/containers/eric-pc-mm-*_.RELEASE.NAMESPACE_*.log
+            - /var/log/containers/eric-pc-vpn-gateway-forwarder-*_.RELEASE.NAMESPACE_*.log
+          fields:
+            logplane: adp-app-logs
+          symlinks: true
+          multiline.pattern: '^[[:space:]]+(at|\.{3})|^Caused by:|^java|^io'
+          multiline.negate: false
+          multiline.match: after
+        harvester:
+          ignoreOlder: 24h
+    eric-log-transformer:
+      config:
+        filebeat:
+          input:
+            filter: |
+              # These log events are from daemonset log shipper.
+              if [input][type] == "container" {
+                grok {
+                  match => {
+                    "[log][file][path]" => "/var/log/containers/%{DATA:pod_name}_%{DATA:namespace}_%{GREEDYDATA:container_name}-%{DATA:container_id}.log"
+                  }
+                  remove_field => ["log"]
+                }
+                mutate {
+                  add_field => { "[metadata][pod_name]" => "%{[pod_name]}" }
+                  add_field => { "[metadata][container_name]" => "%{[container_name]}" }
+                  add_field => { "[metadata][namespace]" => "%{[namespace]}" }
+                  remove_field => ["pod_name","container_name","namespace","container_id"]
+                }
+                # Handle JSON logs by parsing the content of the message field.
+                json {
+                  skip_on_invalid_json => true
+                  source => "[message]"
+                  remove_field => ["stream"]
+                }
+                # go log json format don't comply with ADP log format
+                # ts field is date or float, it caused mapper_parsing_exception
+                if [ts] {
+                    mutate {
+                        copy => { "@timestamp" => "ts" }
+                    }
+                }
+                # logs from pods that do not follow the ADP Design rules
+                # force conversion to fit the ADP design rules.
+                if [stream] {
+                  mutate {
+                    rename => {"[stream]" => "[severity]"}
+                    add_field => {"[version]" => "0.3.0"}
+                    copy => { "@timestamp" => "timestamp" }
+                    add_tag => [ "forced_conversion" ]
+                  }
+                  if [severity] == "stderr" {
+                      mutate {
+                        replace => {"[severity]" => "error"}
+                      }
+                  } else if [severity] == "stdout" {
+                    mutate {
+                      replace => {"[severity]" => "info"}
+                    }
+                  }
+                  if ![service_id] {
+                    mutate {
+                      copy => {"[container_name]" => "[service_id]"}
+                    }
+                  }
+                }
+              }
+              mutate {
+                remove_field => ["host", "ecs", "agent"]
+              }
+      egress:
+        syslog:
+          enabled: false
+          exclusions:
+          - logplane: null
+            rules:
+            - field: '[extra_data][asi][log_plane]'
+              value: alarm
+          inclusions:
+          - field: '[facility]'
+            value: log audit
+          - field: '[facility]'
+            value: local3
+          - field: '[facility]'
+            value: security/authorization messages
+          - contains: -privacy-
+            field: '[metadata][category]'
+          tls:
+            enabled: false
+      enabled: true
+      searchengine:
+        exclusion:
+        - logplane: null
+          rules:
+          - field: '[facility]'
+            value: local3
+        logplaneConfig:
+        - field: '[extra_data][asi][log_plane]'
+          newLogplane: adp-app-asi-logs
+          value: alarm
+        - field: '[facility]'
+          newLogplane: adp-app-audit-logs
+          value: log audit
+        - field: '[metadata][category]'
+          newLogplane: isp-logs
+          value: in-service performance
+        - contains: -privacy-
+          field: '[metadata][category]'
+          newLogplane: adp-app-audit-logs
+        - field: '[metadata][category]'
+          newLogplane: isp-logs
+          value: HA-in-service-performance
+        - field: '[severity]'
+          newLogplane: adp-app-debug-logs
+          value: debug
+      service:
+        endpoints:
+          syslogIn:
+            tls:
+              enforced: optional
+    eric-odca-diagnostic-data-collector:
+      enabled: true
+      env:
+        collectDelayMinutes: 10
+        fileCollectorLocations:
+        - a10net
+        - coredump/core
+        - eric-pc-mm-coredump
+        - eric-pc-mm-dnsapp
+        - eric-pc-mm-pm-jobs
+        - eric-pc-mm-procinfo
+        - eric-pc-mm-sctp
+        - eric-pc-mm-software-configurations/running-checkpoint.tar.gz
+        - eric-pc-mm-ss7config
+        - eric-pc-mm-support-package/cm
+        - eric-pc-sm-coredump
+        - eric-pc-sm-support-package
+        - eric-pmbr-rop-file-store
+        fixedFileCollectorLocations:
+        - eric-cm-yang-provider-bucket
+        - eric-cm-yang-provider-rollback-bucket
+        logIndices:
+        - adp-app-asi-logs*
+        - adp-app-audit-logs*
+        - adp-app-debug-logs*
+        - adp-app-logs*
+        - isp-logs*
+        - pc-mm-admission-control-usage-log*
+        - pc-mm-app-log*
+        - pc-mm-au-data-log*
+        - pc-mm-authorization-failed-log*
+        - pc-mm-embms-m3-log*
+        - pc-mm-embms-sm-log*
+        - pc-mm-fault-management-log*
+        - pc-mm-gf-imeicheck-log*
+        - pc-mm-list-subscriber-result-log*
+        - pc-mm-mmi-notification-log*
+        - pc-mm-mobility-event-log*
+        - pc-mm-monitoring-log*
+        - pc-mm-n17-pei-check-log*
+        - pc-mm-oms-nels-log*
+        - pc-mm-oms-sm-log*
+        - pc-mm-pws-log*
+        - pc-mm-pws-n2-log*
+        - pc-mm-pws-n50-log*
+        - pc-mm-pws-sbc-log*
+        - pc-mm-s1-ml-paging-log*
+        - pc-mm-session-event-log*
+        - pc-mm-ss7trace-log*
+        - pc-mm-usc-log*
+        - pc-mm-worker-report-log*
+      objectStorage:
+        secretName: eric-pc-ep5g-object-storage-mn
+      promQuery:
+        enabled: true
+        maxDataPointsPerRequest: '30000000'
+      sftpCredentials:
+        secretName: eric-pc-ep5g-ddc-secret
+    eric-pm-server:
+      enabled: true
+      rbac:
+        appMonitoring:
+          enabled: true
+      server:
+        configMapOverrideName: eric-pc-ep5g-pm-server-cfg
+        extraArgs:
+          enable-feature: memory-snapshot-on-shutdown
+          query.lookback-delta: 15m
+        persistentVolume:
+          enabled: false
+        retention: 2h
+    eric-sec-access-mgmt:
+      enabled: false
+    eric-sec-access-mgmt-db-pg:
+      enabled: false
+    eric-sec-certm:
+      enabled: true
+    eric-sec-key-management:
+      enabled: true
+      persistence:
+        type: etcd
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 60
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 0
+    eric-sec-sip-tls:
+      enabled: true
+      keyManagement:
+        port: 8210
+      metrics:
+        enabled: true
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 60
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 0
+    eric-si-application-sys-info-handler:
+      asih:
+        applicationId: ep5g-pcx
+      enabled: true
+      probes:
+        eric-si-application-sys-info-handler:
+          livenessProbe:
+            initialDelaySeconds: 60
+          readinessProbe:
+            initialDelaySeconds: 60
+    eric-tm-ingress-controller-cr:
+      enabled: false
+  eric-cloud-native-nf-additions:
+    enabled: true
+    eric-cm-yang-provider:
+      service:
+        loadBalancerIP: 10.81.10.64
+        annotations:
+          sharedVIPLabel: "vip_pool_oam"
+          addressPoolName: "vip_pool_oam"
+      authorization:
+        enabled: true
+      cliExtensionCmds:
+        showAlarms:
+          host: eric-fh-alarm-handler:5006
+        showAlarmsHistory:
+          alarmLogPlane: adp-app-asi-logs
+          host: eric-data-search-engine:9200
+          httpsHost: eric-data-search-engine-tls:9200
+      enabled: true
+      externaldb:
+        dbuser: pg-custom-user
+        host: eric-cm-mediator-db-pg
+      keyManagement:
+        storeHostKeys: true
+      maxValidationErrors: 1
+      objectStorage:
+        secretName: eric-pc-ep5g-object-storage-mn
+      persistentVolumeClaim:
+        sshKeys:
+          size: 10Mi
+      trace:
+        enabled: false
+    eric-cnom-server:
+      enabled: false
+    eric-cnom-server-db-pg:
+      enabled: false
+    eric-data-sftp-server:
+      configuration:
+        bucket_policy: |-
+          sm-cdr-admin eric-pc-sm-cdr rw: sm-cdr-admin eric-pc-sm-pgw-cdr rw: sm-cdr-admin eric-pc-sm-sgw-cdr rw: sm-charging-admin eric-pc-sm-cdr rw: sm-charging-admin eric-pc-sm-pgw-cdr rw: sm-charging-admin eric-pc-sm-sgw-cdr rw: sm-charging-admin eric-pc-sm-rfcdr rw: sm-charging-admin eric-pc-sm-pgw-rfcdr rw: sm-charging-admin eric-pc-sm-sgw-rfcdr rw: sm-charging-admin eric-pc-sm-gyccr rw: sm-charging-admin eric-pc-sm-pgw-gyccr rw: sm-charging-admin eric-pc-sm-gtppcdr rw: sm-charging-admin eric-pc-sm-pgw-gtppcdr rw: sm-charging-admin eric-pc-sm-smf-charging-messages rw:
+          sm-itc-admin eric-pc-sm-itc rw:
+          sm-tracing-admin eric-pc-sm-itc rw: sm-tracing-admin eric-pc-sm-uetrace rw:
+          sm-uetrace-admin eric-pc-sm-uetrace rw:
+          system-troubleshooter eric-pc-mm-itc r: system-troubleshooter eric-pc-sm-itc r: system-troubleshooter itc r: system-troubleshooter eric-pc-mm-ue-trace r: system-troubleshooter eric-pc-mm-sctp r: mm-admin eric-pc-mm-sctp r: system-troubleshooter eric-pc-sm-uetrace r: system-troubleshooter uetrace r: system-troubleshooter eric-pc-sm-coredump r: system-troubleshooter eric-pc-mm-coredump r: system-troubleshooter coredump r:
+          up-troubleshooter coredump r: up-troubleshooter heuristics r: up-troubleshooter itc r: up-troubleshooter uetrace r:
+          up-admin heuristics rw: up-operator heuristics rw:
+          system-trace-admin itc rw: system-trace-admin uetrace r: system-trace-admin eric-pmbr-rop-file-store rw:
+          up-trace-admin itc r: up-trace-admin uetrace r
+        default_bucket_policy: '* eric-pc-sm-lm none: admin * rw: * eric-pc-sm-controller-data
+          none: system-admin * rw: system-security-admin * rw: system-read-only *
+          r: * * none'
+        object_policy: ''
+      enabled: true
+      service:
+        loadBalancerIP: 10.81.10.64
+        annotations:
+          sharedVIPLabel: "vip_pool_oam"
+          addressPoolName: "vip_pool_oam"
+      objectStorage:
+        accessSecretName: eric-pc-ep5g-object-storage-mn
+      privacy_notice_file: |
+        IF YOU ARE NOT AN AUTHORIZED USER, PLEASE EXIT IMMEDIATELY
+
+        This system processes sensitive personal data. The misuse of such data may
+        generate considerable harm to the data subjects. Be reminded of the
+        confidentiality obligations you have when accessing this kind of data and
+        the disciplinary consequences of improper handling.
+
+        Version: 1.1, Last Updated: 2020-11-10
+    eric-pm-bulk-reporter:
+      enabled: true
+      service:
+        loadBalancerIP: 10.81.10.64
+        annotations:
+          sharedVIPLabel: "vip_pool_oam"
+          addressPoolName: "vip_pool_oam"
+      env:
+        iscompressed: true
+      objectStorage:
+        secretName: eric-pc-ep5g-object-storage-mn
+      tolerations:
+        eric-pm-bulk-reporter:
+        - effect: NoExecute
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+          tolerationSeconds: 60
+        - effect: NoExecute
+          key: node.kubernetes.io/unreachable
+          operator: Exists
+          tolerationSeconds: 0
+      trace:
+        enabled: false
+    eric-sec-admin-user-management:
+      day0AdminUser:
+        admin:
+          secret: eric-pc-ep5g-ldap-admin-creds
+      enabled: true
+      ldap:
+        day0LdapClientSimpleBindAllowed: false
+      notices:
+        legal: IF YOU ARE NOT AN AUTHORIZED USER, PLEASE EXIT IMMEDIATELY
+        postLogin: ''
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 60
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 0
+    eric-sec-ldap-server:
+      additionalEnv:
+      - name: LDAP_LOG_LEVEL
+        value: '256'
+      brAgent:
+        enabled: false
+      enabled: true
+      metrics:
+        enabled: false
+      persistentVolumeClaim:
+        size: 256Mi
+      tolerations:
+        ldapproxy:
+        - effect: NoExecute
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+          tolerationSeconds: 60
+        - effect: NoExecute
+          key: node.kubernetes.io/unreachable
+          operator: Exists
+          tolerationSeconds: 0
+  eric-lcm-upgrade-sequencer:
+    enabled: true
+  eric-odca-diagnostic-data-collector:
+    sftpCredentials:
+      enabled: false
+  eric-pc-kvdb-rd-operator:
+    affinityAwareness: false
+    enabled: true
+  eric-pc-kvdb-rd-server:
+    enabled: true
+    probes:
+      node:
+        startupProbe:
+          failureThreshold: 600
+    server:
+      maxMemory: 2415mb
+  eric-pc-mm:
+    enabled: true
+    eric-pc-mm-br-agent:
+      brAgent:
+        enabled: false
+    eric-pc-mm-controller:
+      imageCredentials:
+        logshipper:
+          registry:
+            url: "ccd.registry:5000"
+      service:
+        useK8sNwSBI: true
+        sbi:
+          loadBalancerIP: 10.81.20.80
+      securityContext:
+        appArmorProfile: docker-pcc
+        
+      configMap: |-
+        #!/bin/sh -f
+        set -x
+        gsh create_eth_port -eqp 1.1 -ep 1 -fc false -as up
+        gsh create_eth_port -eqp 1.1 -ep 2 -fc false -as up
+        gsh create_eth_port -eqp 1.1 -ep 3 -fc false -as up
+        gsh create_eth_port -eqp 1.1 -ep 4 -fc false -as up
+        gsh create_eth_vlan -eqp 1.1 -ep 1 -vid 2022
+        gsh create_eth_vlan -eqp 1.1 -ep 2 -vid 2024
+        gsh create_eth_vlan -eqp 1.1 -ep 3 -vid 2021
+        gsh create_eth_vlan -eqp 1.1 -ep 4 -vid 2023
+        gsh create_inbound_pf_policy -ifp ETH_1_1_1_2022_OM_CN
+        gsh create_inbound_pf_policy -ifp ETH_1_1_2_2024_RAN
+        gsh create_inbound_pf_policy -ifp ETH_1_1_3_2021_SIG
+        gsh create_inbound_pf_policy -ifp ETH_1_1_4_2023_MEDIA
+        gsh create_inbound_pf_rule -ifp ETH_1_1_1_2022_OM_CN -fr 1 -r permit -p ip -d NULL -dm NULL -sip 0.0.0.0 -sipm 0.0.0.0 -dip 0.0.0.0 -dipm 0.0.0.0 -pp 0 -ppq gt -ipo true -sp 0 -spq gt -dp 0 -dpq gt -tf NULL -tfm NULL -it 0 -itq gt -sd NULL -lt false
+        gsh create_inbound_pf_rule -ifp ETH_1_1_2_2024_RAN -fr 1 -r permit -p ip -d NULL -dm NULL -sip 0.0.0.0 -sipm 0.0.0.0 -dip 0.0.0.0 -dipm 0.0.0.0 -pp 0 -ppq gt -ipo true -sp 0 -spq gt -dp 0 -dpq gt -tf NULL -tfm NULL -it 0 -itq gt -sd NULL -lt false
+        gsh create_inbound_pf_rule -ifp ETH_1_1_3_2021_SIG -fr 1 -r permit -p ip -d NULL -dm NULL -sip 0.0.0.0 -sipm 0.0.0.0 -dip 0.0.0.0 -dipm 0.0.0.0 -pp 0 -ppq gt -ipo true -sp 0 -spq gt -dp 0 -dpq gt -tf NULL -tfm NULL -it 0 -itq gt -sd NULL -lt false
+        gsh create_inbound_pf_rule -ifp ETH_1_1_4_2023_MEDIA -fr 1 -r permit -p ip -d NULL -dm NULL -sip 0.0.0.0 -sipm 0.0.0.0 -dip 0.0.0.0 -dipm 0.0.0.0 -pp 0 -ppq gt -ipo true -sp 0 -spq gt -dp 0 -dpq gt -tf NULL -tfm NULL -it 0 -itq gt -sd NULL -lt false
+        gsh create_ip_network -nw OM_CN -local false
+        gsh create_ip_network -nw RAN -local false
+        gsh create_ip_network -nw SIG -local false
+        gsh create_ip_network -nw MEDIA -local false
+        gsh create_ip_interface -ifn ETH_1_1_1_2022_OM_CN -ip 10.81.10.10 -mask 255.255.255.248 -eqp 1.1 -ep 1 -vid 2022 -ifp ETH_1_1_1_2022_OM_CN -nw OM_CN
+        gsh create_ip_interface -ifn ETH_1_1_2_2024_RAN -ip 10.81.50.10 -mask 255.255.255.248 -eqp 1.1 -ep 2 -vid 2024 -ifp ETH_1_1_2_2024_RAN -nw RAN
+        gsh create_ip_interface -ifn ETH_1_1_3_2021_SIG -ip 10.81.20.10 -mask 255.255.255.248 -eqp 1.1 -ep 3 -vid 2021 -ifp ETH_1_1_3_2021_SIG -nw SIG
+        gsh create_ip_interface -ifn ETH_1_1_4_2023_MEDIA -ip 10.81.30.10 -mask 255.255.255.248 -eqp 1.1 -ep 4 -vid 2023 -ifp ETH_1_1_4_2023_MEDIA -nw MEDIA
+        gsh create_static_route -eqp 1.1 -nw OM_CN -dip 0.0.0.0 -mask 0.0.0.0 -gip 10.81.10.9
+        gsh create_static_route -eqp 1.1 -nw RAN -dip 0.0.0.0 -mask 0.0.0.0 -gip 10.81.50.9
+        gsh create_static_route -eqp 1.1 -nw SIG -dip 0.0.0.0 -mask 0.0.0.0 -gip 10.81.20.9
+        gsh create_static_route -eqp 1.1 -nw MEDIA -dip 0.0.0.0 -mask 0.0.0.0 -gip 10.81.30.9
+        gsh create_router_instance -eqp 1.1 -nw OM_CN -ip 10.81.10.9 -sn NULL -sc NULL -sl NULL
+        gsh create_router_instance -eqp 1.1 -nw RAN -ip 10.81.50.9 -sn NULL -sc NULL -sl NULL
+        gsh create_router_instance -eqp 1.1 -nw SIG -ip 10.81.20.9 -sn NULL -sc NULL -sl NULL
+        gsh create_router_instance -eqp 1.1 -nw MEDIA -ip 10.81.30.9 -sn NULL -sc NULL -sl NULL
+        gsh create_bfd -nw OM_CN -dtx 50 -mrx 50 -mult 3
+        gsh create_bfd -nw RAN -dtx 50 -mrx 50 -mult 3
+        gsh create_bfd -nw SIG -dtx 50 -mrx 50 -mult 3
+        gsh create_bfd -nw MEDIA -dtx 50 -mrx 50 -mult 3
+        gsh create_bfd_neighbor -nw OM_CN -ip 10.81.10.9
+        gsh create_bfd_neighbor -nw RAN -ip 10.81.50.9
+        gsh create_bfd_neighbor -nw SIG -ip 10.81.20.9
+        gsh create_bfd_neighbor -nw MEDIA -ip 10.81.30.9
+        gsh create_ip_service -sn OAM -dscp NULL -nw OM_CN
+        gsh create_ip_service -sn DNS -dscp NULL -nw OM_CN
+        gsh create_ip_service -sn NTP -dscp NULL -nw OM_CN
+        gsh create_ip_service_address -sn OAM -ip 10.81.10.80
+        gsh create_ip_service_address -sn DNS -ip 10.81.10.80
+        gsh create_ip_service_address -sn NTP -ip 10.81.10.80
+      
+    eric-pc-mm-forwarder:
+      securityContext:
+        appArmorProfile: docker-pcc
+      imageCredentials:
+        logshipper:
+          registry:
+            url: "ccd.registry:5000"
+      networks:
+        - name: pcc-mm-oam-ext1
+          cniVersion: 0.3.1
+          type: ovs
+          bridge: br0
+          trunk:
+          - "minID": 2022
+            "maxID": 2022
+          mtu: 1500
+        - name: pcc-mm-ran-ext1
+          cniVersion: 0.3.1
+          type: ovs
+          bridge: br0
+          trunk:
+          - "minID": 2024
+            "maxID": 2024
+          mtu: 1500
+        - name: pcc-mm-sig-ext1
+          cniVersion: 0.3.1
+          type: ovs
+          bridge: br0
+          trunk:
+          - "minID": 2021
+            "maxID": 2021
+          mtu: 1500
+        - name: pcc-mm-media-ext1
+          cniVersion: 0.3.1
+          type: ovs
+          bridge: br0
+          trunk:
+          - "minID": 2023
+            "maxID": 2023
+          mtu: 1500
+   
+    eric-pc-mm-mobility:
+      securityContext:
+        appArmorProfile: docker-pcc    
+      imageCredentials:
+        logshipper:
+          registry:
+            url: "ccd.registry:5000"
+      service:
+        useK8sNwSBI: true
+        sbi:
+          loadBalancerIP: 10.81.20.80
+
+
+    eric-pc-mm-sctp:
+      securityContext:
+        appArmorProfile: docker-pcc    
+      imageCredentials:
+        logshipper:
+          registry:
+            url: "ccd.registry:5000"
+          
+  eric-pc-networking-cm-agent:
+    enabled: true
+    objectStorage:
+      accessSecretName: eric-pc-ep5g-object-storage-mn
+  eric-pc-pm-init:
+    deployType:
+      pcc:
+        pcmm:
+          enabled: true
+        pcsm:
+          enabled: true
+    enabled: true
+  eric-pc-routing-aggregator:
+    enabled: false
+  eric-pc-routing-engine:
+    enabled: false
+  eric-pc-routing-engine-api:
+    enabled: false
+  eric-pc-sm:
+    clusterRole: eric-pc-sm-crd-test
+    enabled: true
+    eric-pc-sm-notification-forwarder:
+      services:
+        ipv4:
+          enabled: true
+        namfnotification-ipv4:
+          loadBalancerIP: 10.81.20.64
+        nudmnotification-ipv4:
+          loadBalancerIP: 10.81.20.67
+        npcfnotification-ipv4:
+          loadBalancerIP: 10.81.20.71
+        nnrfnotification-ipv4:
+          loadBalancerIP: 10.81.20.69
+#        nchfnotification-ipv4:
+#          loadBalancerIP: 
+#        nsmfnotification-ipv4:
+#          loadBalancerIP: 1
+      annotations:
+        metallb.universe.tf/address-pool: "vip_pool_sig"
+        metallb.universe.tf/allow-shared-ip: "vip_pool_sig"
+        sharedVIPLabel: "vip_pool_sig"
+        addressPoolName: "vip_pool_sig"
+    
+    eric-pc-sm-nsmf-forwarder:
+      services:
+        ipv4:
+          enabled: true
+        nsmf-ipv4:
+          loadBalancerIP: 10.81.20.66
+      annotations:
+        metallb.universe.tf/address-pool: "vip_pool_sig"
+        metallb.universe.tf/allow-shared-ip: "vip_pool_sig"
+        sharedVIPLabel: "vip_pool_sig"
+        addressPoolName: "vip_pool_sig"
+    eric-pc-sm-udp-forwarder:
+      services:
+#        ga:
+#          loadBalancerIP: 
+#          annotations:
+#            metallb.universe.tf/address-pool: smf-sbi
+#            metallb.universe.tf/allow-shared-ip: smf-sbi
+        gns5s8:
+          loadBalancerIP: 10.81.30.68
+          annotations:
+            metallb.universe.tf/address-pool: smf-sbi
+            metallb.universe.tf/allow-shared-ip: smf-sbi
+        s4s11:
+          loadBalancerIP: 10.81.30.67
+          annotations:
+            metallb.universe.tf/address-pool: smf-sbi
+            metallb.universe.tf/allow-shared-ip: smf-sbi
+        s5s8:
+          loadBalancerIP: 10.81.30.68
+          annotations:
+            metallb.universe.tf/address-pool: smf-sbi
+            metallb.universe.tf/allow-shared-ip: smf-sbi
+        sxa:
+          loadBalancerIP: 10.81.20.85
+          annotations:
+            metallb.universe.tf/address-pool: smf-sbi
+            metallb.universe.tf/allow-shared-ip: smf-sbi
+        sxb:
+          loadBalancerIP: 10.81.20.84
+          annotations:
+            metallb.universe.tf/address-pool: smf-sbi
+            metallb.universe.tf/allow-shared-ip: smf-sbi
+  
+  eric-pc-up-partitioner:
+    enabled: false
+  eric-pc-up-timer-wheel:
+    enabled: false
+  eric-pc-vpn-gateway-forwarder:
+    enabled: false
+  eric-pm-resource-monitor:
+    enabled: true
+    metricConfig:
+      configmapName: eric-pc-ep5g-pmrm-metric-config
+    objectStorage:
+      accessSecretName: eric-pc-ep5g-object-storage-mn
+  eric-probe-event-report-broker:
+    enabled: false
+  eric-probe-virtual-tap-broker:
+    enabled: false
+  productInfoStatus: disabled
+  snmp-alarm-provider-secret-creation:
+    enabled: false
+eric-pc-gateway:
+  enabled: true
+  eric-cloud-native-base:
+    enabled: false
+    eric-si-application-sys-info-handler:
+      asih:
+        applicationId: ep5g-pcx
+  eric-cloud-native-nf-additions:
+    enabled: false
+  eric-dst-agent:
+    enabled: false
+  eric-dst-collector:
+    enabled: false
+  eric-dst-query:
+    enabled: false
+  eric-odca-diagnostic-data-collector:
+    sftpCredentials:
+      enabled: false
+  eric-odca-health-check-monitor:
+    enabled: false
+  eric-pc-firewall-coordinator-at:
+    enabled: false
+  eric-pc-kvdb-rd-operator:
+    enabled: false
+  eric-pc-kvdb-rd-server:
+    enabled: false
+  eric-pc-networking-cm-agent:
+    enabled: false
+  eric-pc-pm-init:
+    enabled: false
+  eric-pc-routing-aggregator:
+    enabled: true
+    objectStorage:
+      accessSecretName: eric-pc-ep5g-object-storage-mn
+  eric-pc-routing-engine:
+    enabled: true
+    objectStorage:
+      accessSecretName: eric-pc-ep5g-object-storage-mn
+    interfaces:
+      type: ovs
+      ovs:
+        - bridge: br0
+          mtu: 1500
+          vlan_mode: trunk
+          trunk:
+          - "minID": 2015
+            "maxID": 2018        
+              
+              
+              
+
+  eric-pc-routing-engine-api:
+    enabled: true
+    objectStorage:
+      accessSecretName: eric-pc-ep5g-object-storage-mn
+  eric-pc-up-br-agent:
+    enabled: false
+  eric-pc-up-data-plane:
+    nodeSelector:
+      type: high-throughput
+    resources:
+      dataPlane:
+        limits:
+          hugepages-1Gi: "2Gi"
+          intel.com/intel_sriov_netdevice: '1'
+        requests:
+          hugepages-1Gi: "2Gi"
+          intel.com/intel_sriov_netdevice: '1'
+    interfaces:
+      - name: sriov-network
+        type: sriov
+        cniVersion: "0.3.1"
+        resourceName: 'intel.com/intel_sriov_netdevice'
+    dst:
+      enabled: false
+    enabled: true
+    objectStorage:
+      accessSecretName: eric-pc-ep5g-object-storage-mn
+    reporting:
+      ebm:
+        enabled: true
+  eric-pc-up-partitioner:
+    enabled: true
+    objectStorage:
+      accessSecretName: eric-pc-ep5g-object-storage-mn
+    tableUpdate:
+      gainGracePeriod:
+        periodMilliseconds: 0
+  eric-pc-up-pfcp-endpoint:
+    dst:
+      enabled: false
+    enabled: true
+    objectStorage:
+      accessSecretName: eric-pc-ep5g-object-storage-mn
+  eric-pc-up-service-chaining-cm-agent:
+    enabled: true
+    objectStorage:
+      accessSecretName: eric-pc-ep5g-object-storage-mn
+  eric-pc-up-timer-wheel:
+    enabled: true
+    objectStorage:
+      accessSecretName: eric-pc-ep5g-object-storage-mn
+  eric-pc-up-user-plane-cm-agent:
+    enabled: true
+    objectStorage:
+      accessSecretName: eric-pc-ep5g-object-storage-mn
+  eric-pm-kube-state-metrics:
+    enabled: false
+  eric-pm-resource-monitor:
+    enabled: false
+  eric-probe-event-report-broker:
+    ebm:
+      enabled: true
+    enabled: true
+    env:
+      deploymentType: pcg
+      reporterPort: 8080
+    objectStorage:
+      certSecret: eric-data-object-storage-mn-cert
+      credentials:
+        kubernetesSecretName: eric-pc-ep5g-object-storage-mn
+      enabled: true
+      host: eric-data-object-storage-mn:9000
+      privateKey: srvprivkey.pem
+      publicCert: srvcert.pem
+      tls: true
+    staticConfig:
+      eventReporting:
+        streamConsumer:
+        - address: 10.5.5.68
+          domain:
+          - upf
+          name: ebm-server-up
+          port: 8090
+          upfEvents:
+          - name: service-usage
+            period: 5
+            trigger:
+            - period
+  snmp-alarm-provider-secret-creation:
+    enabled: false
+eric-sec-ldap-admin-creds:
+  adminCredentials: null
+
+local:
+- anchor:
+    enabled: true
+- anchor:
+    enabled: false
+m2m:
+  day0-user-json: null
+snmp-alarm-provider-secret-creation:
+  enabled: false

@@ -1,0 +1,1002 @@
+eric-pc-controller:
+  eric-cloud-native-base:
+    eric-cm-mediator:
+      replicaCount: 1
+      resources:
+        eric-cm-mediator:
+          limits:
+            cpu: 1200m
+            ephemeral-storage: 2Gi
+            memory: 768Mi
+          requests:
+            cpu: 50m
+            ephemeral-storage: 2Gi
+            memory: 512Mi
+        eric-cm-mediator-init-container:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+        eric-cm-mediator-notifier:
+          limits:
+            cpu: 500m
+            ephemeral-storage: 2Gi
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            ephemeral-storage: 2Gi
+            memory: 256Mi
+    eric-cm-mediator-db-pg:
+      highAvailability:
+        replicaCount: 1
+      resources:
+        metrics:
+          limits:
+            cpu: 50m
+            memory: 256Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
+        postgres:
+          limits:
+            cpu: 450m
+            memory: 2560Mi
+          requests:
+            cpu: 20m
+            memory: 224Mi
+    eric-data-coordinator-zk:
+      heap: 1G
+      replicaCount: 1
+      resources:
+        datacoordinatorzk:
+          limits:
+            cpu: 712m
+            memory: 4000Mi
+          requests:
+            cpu: 71m
+            memory: 400Mi
+    eric-data-distributed-coordinator-ed:
+      pods:
+        dced:
+          replicas: 1
+      resources:
+        dced:
+          limits:
+            cpu: '2'
+            memory: 1000Mi
+          requests:
+            cpu: 28m
+            memory: 100Mi
+        init:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+    eric-data-message-bus-kf:
+      configurationOverrides:
+        default.replication.factor: 1
+        min.insync.replicas: 1
+        offsets.topic.replication.factor: 1
+        transaction.state.log.min.isr: 1
+        transaction.state.log.replication.factor: 1
+      replicaCount: 1
+      resources:
+        checkzkready:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+        jmxexporter:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 50m
+            memory: 512Mi
+        messagebuskf:
+          limits:
+            cpu: 1800m
+            memory: 6Gi
+          requests:
+            cpu: 250m
+            memory: 1000Mi
+    eric-data-object-storage-mn:
+      affinity:
+        podAntiAffinity: soft
+      mode: standalone
+      resources:
+        mgt:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 25m
+            memory: 100Mi
+        server:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 100Mi
+    eric-data-search-engine:
+      jvmHeap:
+        data: 1024m
+        ingest: 512m
+        master: 512m
+      replicaCount:
+        data: 1
+        ingest: 1
+        master: 1
+      resources:
+        data:
+          limits:
+            cpu: '2'
+            memory: 2Gi
+          requests:
+            cpu: 185m
+            memory: 512Mi
+        ingest:
+          limits:
+            cpu: '2'
+            memory: 1Gi
+          requests:
+            cpu: 20m
+            memory: 50Mi
+        master:
+          limits:
+            cpu: '2'
+            memory: 1Gi
+          requests:
+            cpu: 20m
+            memory: 50Mi
+        metrics:
+          limits:
+            cpu: 50m
+            memory: 100Mi
+          requests:
+            cpu: 5m
+            memory: 40Mi
+        sysctl:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+        tlsproxy:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 10m
+            memory: 40Mi
+    eric-data-search-engine-curator:
+      resources:
+        curator:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+    eric-fh-alarm-handler:
+      alarmhandler:
+        asi:
+          topic:
+            partitions: 1
+            replicationFactor: 1
+        fi:
+          topic:
+            partitions: 1
+            replicationFactor: 1
+      replicaCount: 1
+      resources:
+        alarmhandler:
+          limits:
+            cpu: '1'
+            ephemeral-storage: 4Gi
+            memory: 1Gi
+          requests:
+            cpu: 70m
+            ephemeral-storage: 4Gi
+            memory: 256Mi
+        topiccreator:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+    eric-fh-alarm-handler-db-pg:
+      highAvailability:
+        replicaCount: 1
+      resources:
+        metrics:
+          limits:
+            cpu: 50m
+            memory: 256Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
+        postgres:
+          limits:
+            cpu: 450m
+            memory: 2560Mi
+          requests:
+            cpu: 20m
+            memory: 224Mi
+    eric-fh-snmp-alarm-provider:
+      resources:
+        alarmprovider:
+          limits:
+            cpu: '1'
+            memory: 1536Mi
+          requests:
+            cpu: 36m
+            memory: 256Mi
+      service:
+        replicas: 1
+    eric-lm-combined-server:
+      licenseConsumerHandler:
+        replicaCount: 1
+      licenseServerClient:
+        replicaCount: 1
+      resources:
+        eric-lm-database-migration:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+        eric-lm-license-consumer-handler:
+          limits:
+            cpu: '1'
+            memory: 1Gi
+          requests:
+            cpu: 25m
+            memory: 400Mi
+        eric-lm-license-server-client:
+          limits:
+            cpu: '1'
+            memory: 1Gi
+          requests:
+            cpu: 25m
+            memory: 200Mi
+    eric-lm-combined-server-db-pg:
+      highAvailability:
+        replicaCount: 1
+      resources:
+        metrics:
+          limits:
+            cpu: 50m
+            memory: 256Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
+        postgres:
+          limits:
+            cpu: 450m
+            memory: 2560Mi
+          requests:
+            cpu: 20m
+            memory: 224Mi
+    eric-log-shipper:
+      resources:
+        logshipper:
+          limits:
+            cpu: 250m
+            memory: 500Mi
+          requests:
+            cpu: 50m
+            memory: 100Mi
+    eric-log-transformer:
+      jvmHeap: 2048m
+      replicaCount: 1
+      resources:
+        logtransformer:
+          limits:
+            cpu: '2'
+            memory: 3Gi
+          requests:
+            cpu: 240m
+            memory: 128Mi
+        metrics:
+          limits:
+            cpu: 50m
+            memory: 200Mi
+          requests:
+            cpu: 5m
+            memory: 40Mi
+        tlsproxy:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 5m
+            memory: 40Mi
+    eric-odca-diagnostic-data-collector:
+      manualService:
+        replicas: 1
+      resources:
+        diagnostic-data-collector:
+          limits:
+            cpu: 500m
+            ephemeral-storage: 10Gi
+            memory: 1024M
+          requests:
+            cpu: 100m
+            ephemeral-storage: 1Gi
+            memory: 300M
+        diagnostic-data-collector-manual:
+          limits:
+            cpu: 500m
+            ephemeral-storage: 10Gi
+            memory: 1024M
+          requests:
+            cpu: 100m
+            ephemeral-storage: 1Gi
+            memory: 300M
+      service:
+        replicas: 1
+    eric-pm-server:
+      resources:
+        eric-pm-configmap-reload:
+          limits:
+            cpu: 30m
+            memory: 50Mi
+          requests:
+            cpu: 5m
+            memory: 2Mi
+        eric-pm-exporter:
+          limits:
+            cpu: 30m
+            memory: 50Mi
+          requests:
+            cpu: 5m
+            memory: 2Mi
+        eric-pm-initcontainer:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+        eric-pm-reverseproxy:
+          limits:
+            cpu: 300m
+            memory: 100Mi
+          requests:
+            cpu: 10m
+            memory: 6Mi
+        eric-pm-server:
+          limits:
+            cpu: 910m
+            ephemeral-storage: 8Gi
+            memory: 3Gi
+          requests:
+            cpu: 66m
+            ephemeral-storage: 8Gi
+            memory: 30Mi
+      server:
+        replicaCount: 1
+    eric-sec-certm:
+      resources:
+        certm:
+          limits:
+            cpu: 750m
+            memory: 2Gi
+          requests:
+            cpu: 35m
+            memory: 300Mi
+    eric-sec-key-management:
+      replicas: 1
+      resources:
+        ca:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+        shelter:
+          limits:
+            cpu: 300m
+            memory: 1200Mi
+          requests:
+            cpu: 25m
+            memory: 200Mi
+        vault:
+          limits:
+            cpu: 1200m
+            memory: 900Mi
+          requests:
+            cpu: 25m
+            memory: 200Mi
+    eric-sec-sip-tls:
+      replicaCount: 1
+      resources:
+        sip-tls:
+          limits:
+            cpu: 600m
+            memory: 600Mi
+          requests:
+            cpu: 30m
+            memory: 100Mi
+        sip-tls-init:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+        sip-tls-supervisor:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+          requests:
+            cpu: 20m
+            memory: 100Mi
+    eric-si-application-sys-info-handler:
+      replicaCount: 1
+      resources:
+        eric-si-application-sys-info-handler:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 50m
+            memory: 50Mi
+  eric-cloud-native-nf-additions:
+    eric-cm-yang-provider:
+      resources:
+        cliExtensionCmds:
+          limits:
+            cpu: 30m
+            memory: 145Mi
+          requests:
+            cpu: 2m
+            memory: 50Mi
+        externalNotifSender:
+          limits:
+            cpu: 59m
+            ephemeral-storage: 500Mi
+            memory: 285Mi
+          requests:
+            cpu: 2m
+            memory: 50Mi
+        initContainer:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+        notificationController:
+          limits:
+            cpu: 59m
+            memory: 285Mi
+          requests:
+            cpu: 2m
+            memory: 50Mi
+        objectStorageAdapter:
+          limits:
+            cpu: 59m
+            memory: 285Mi
+          requests:
+            cpu: 2m
+            memory: 50Mi
+        pmMetrics:
+          limits:
+            cpu: 59m
+            memory: 285Mi
+          requests:
+            cpu: 2m
+            memory: 50Mi
+        schemaSynchronizer:
+          limits:
+            cpu: 820m
+            memory: 2275Mi
+          requests:
+            cpu: 50m
+            memory: 100Mi
+        sshd:
+          limits:
+            cpu: 59m
+            memory: 285Mi
+          requests:
+            cpu: 2m
+            memory: 150Mi
+        yangDbAdapter:
+          limits:
+            cpu: 119m
+            memory: 285Mi
+          requests:
+            cpu: 5m
+            memory: 100Mi
+        yangEngine:
+          limits:
+            cpu: 237m
+            memory: 2275Mi
+          requests:
+            cpu: 50m
+            memory: 350Mi
+        yangLibExt:
+          limits:
+            cpu: 59m
+            memory: 285Mi
+          requests:
+            cpu: 8m
+            memory: 50Mi
+    eric-data-sftp-server:
+      replicaCount: 1
+      resources:
+        sftpServer:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 256Mi
+    eric-pm-bulk-reporter:
+      resources:
+        alarmreporter:
+          limits:
+            cpu: 500m
+            memory: 200Mi
+          requests:
+            cpu: 50m
+            memory: 50Mi
+        bulkreporter:
+          limits:
+            cpu: 500m
+            memory: 200Mi
+          requests:
+            cpu: 50m
+            memory: 50Mi
+    eric-sec-admin-user-management:
+      replicaCount: 1
+      resources:
+        aum:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 17m
+            memory: 128Mi
+    eric-sec-ldap-server:
+      replicaCount: 1
+      resources:
+        ldap:
+          limits:
+            cpu: 1300m
+            ephemeral-storage: 2Gi
+            memory: 1536Mi
+          requests:
+            cpu: 11m
+            ephemeral-storage: 1Gi
+            memory: 384Mi
+        ldapinit:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+        ldapproxy:
+          limits:
+            cpu: 2250m
+            ephemeral-storage: 2Gi
+            memory: 4072Mi
+          requests:
+            cpu: 70m
+            ephemeral-storage: 1Gi
+            memory: 1Gi
+        metricsExporter:
+          limits:
+            cpu: 200m
+            ephemeral-storage: 2Gi
+            memory: 512Mi
+          requests:
+            cpu: 10m
+            ephemeral-storage: 1Gi
+            memory: 128Mi
+  eric-pc-kvdb-rd-operator:
+    replicaCount: 1
+    resources:
+      logcar:
+        limits:
+          cpu: '0'
+          memory: '0'
+        requests:
+          cpu: '0'
+          memory: '0'
+      operator:
+        limits:
+          cpu: 500m
+          memory: 220Mi
+        requests:
+          cpu: 50m
+          memory: 30Mi
+  eric-pc-kvdb-rd-server:
+    numberOfMaster: 3
+    replicationFactor: 1
+    resources:
+      metricExporter:
+        limits:
+          cpu: 50m
+          memory: 512Mi
+        requests:
+          cpu: 15m
+          memory: 50Mi
+      node:
+        limits:
+          cpu: 800m
+          memory: 2560Mi
+        requests:
+          cpu: 85m
+          memory: 206Mi
+  eric-pc-mm:
+    eric-pc-mm-controller:
+      replicaCount: 1
+      resources:
+        controller:
+          limits:
+            cpu: '2'
+            memory: 10Gi
+          requests:
+            cpu: 285m
+            memory: 2Gi
+        initContainer:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+    eric-pc-mm-forwarder:
+      replicaCount: 1
+      resources:
+        forwarder:
+          limits:
+            cpu: '1'
+            memory: 1Gi
+          requests:
+            cpu: 71m
+            memory: 1Gi
+    eric-pc-mm-mobility:
+      replicaCount: 1
+      resources:
+        mobility:
+          limits:
+            cpu: '2'
+            memory: 3Gi
+          requests:
+            cpu: '1'
+            memory: 1536Mi
+    eric-pc-mm-sctp:
+      replicaCount: 1
+      resources:
+        sctp:
+          limits:
+            cpu: '1'
+            memory: 768Mi
+          requests:
+            cpu: 200m
+            memory: 384Mi
+  eric-pc-networking-cm-agent:
+    replicaCount: 1
+    resources:
+      eric-pc-networking-cm-agent:
+        limits:
+          cpu: 500m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 500Mi
+          memory: 64Mi
+  eric-pc-pm-init:
+    replicaCount: 1
+    resources:
+      pmInit:
+        limits:
+          cpu: 50m
+          memory: 100Mi
+        requests:
+          cpu: 50m
+          memory: 100Mi
+  eric-pc-sm:
+    eric-pc-sm-br-agent:
+      replicaCount: 0
+      resources:
+        bragent:
+          limits:
+            cpu: 50m
+            memory: 200Mi
+          requests:
+            cpu: 50m
+            memory: 200Mi
+    eric-pc-sm-controller:
+      replicaCount: 1
+      resources:
+        check-object-storage-availability:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+        controller:
+          limits:
+            cpu: '2'
+            memory: 2Gi
+          requests:
+            cpu: 100m
+            memory: 512Mi
+    eric-pc-sm-diameter:
+      replicaCount: 1
+      resources:
+        diameter:
+          limits:
+            cpu: 750m
+            memory: 2Gi
+          requests:
+            cpu: 100m
+            memory: 1Gi
+    eric-pc-sm-http-client:
+      replicaCount: 1
+      resources:
+        httpclient:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+    eric-pc-sm-ip-allocator:
+      replicaCount: 1
+      resources:
+        ipallocator:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 512Mi
+    eric-pc-sm-notification-forwarder:
+      replicaCount: 1
+      resources:
+        notifforwarder:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+    eric-pc-sm-nsmf-forwarder:
+      replicaCount: 1
+      resources:
+        nsmfforwarder:
+          limits:
+            cpu: 750m
+            memory: 1Gi
+          requests:
+            cpu: 150m
+            memory: 100Mi
+    eric-pc-sm-sgw-session:
+      replicaCount: 1
+      resources:
+        sgw:
+          limits:
+            cpu: '1'
+            memory: 2Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+    eric-pc-sm-smf-pgw-session:
+      replicaCount: 1
+      resources:
+        smf:
+          limits:
+            cpu: '1'
+            memory: 3Gi
+          requests:
+            cpu: 200m
+            memory: 1536Mi
+    eric-pc-sm-target-database-master-rd:
+      replicas: 1
+      resources:
+        redis:
+          limits:
+            cpu: 300m
+            memory: 100Mi
+          requests:
+            cpu: 50m
+            memory: 100Mi
+        redis-replica-wait-for-service:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+    eric-pc-sm-target-database-replica-rd:
+      replicas: 1
+      resources:
+        redis:
+          limits:
+            cpu: 300m
+            memory: 100Mi
+          requests:
+            cpu: 50m
+            memory: 100Mi
+        redis-replica-wait-for-service:
+          limits:
+            cpu: '0'
+            memory: '0'
+          requests:
+            cpu: '0'
+            memory: '0'
+    eric-pc-sm-udp-forwarder:
+      replicaCount: 1
+      resources:
+        udpforwarder:
+          limits:
+            cpu: '1'
+            memory: 2Gi
+          requests:
+            cpu: 200m
+            memory: 200Mi
+  eric-pm-resource-monitor:
+    replicaCount: 1
+    resources:
+      pmrm:
+        limits:
+          cpu: 100m
+          ephemeral-storage: 512Mi
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          ephemeral-storage: 128Mi
+          memory: 64Mi
+eric-pc-gateway:
+  eric-pc-routing-aggregator:
+    autoScaling:
+      enabled: false
+    replicaCount: 1
+    resources:
+      routingAggregator:
+        limits:
+          cpu: '1'
+          ephemeral-storage: 1Gi
+          memory: 2Gi
+        requests:
+          cpu: 50m
+          ephemeral-storage: 500Mi
+          memory: 50Mi
+  eric-pc-routing-engine:
+    replicaCount: 1
+    resources:
+      eric-pc-routing-engine:
+        limits:
+          cpu: '1'
+          ephemeral-storage: 1Gi
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 500Mi
+          memory: 100Mi
+  eric-pc-routing-engine-api:
+    hpa:
+      maxReplicas: 1
+      minReplicas: 1
+      targetAverageUtilization: 100
+    replicaCount: 1
+    resources:
+      eric-pc-routing-engine-api:
+        limits:
+          cpu: '1'
+          ephemeral-storage: 1Gi
+          memory: 512Mi
+        requests:
+          cpu: 50m
+          ephemeral-storage: 500Mi
+          memory: 100Mi
+  eric-pc-up-data-plane:
+    replicaCount: 1
+    resources:
+      dataPlane:
+        limits:
+          cpu: '8'
+          memory: 8Gi
+        requests:
+          cpu: '8'
+          memory: 8Gi
+  eric-pc-up-partitioner:
+    autoScaling:
+      enabled: false
+    replicaCount: 1
+    resources:
+      partitioner:
+        limits:
+          cpu: 750m
+          ephemeral-storage: 1Gi
+          memory: 512Mi
+        requests:
+          cpu: 50m
+          ephemeral-storage: 500Mi
+          memory: 20Mi
+  eric-pc-up-pfcp-endpoint:
+    autoScaling:
+      enabled: false
+    replicaCount: 1
+    resources:
+      pfcpEndpoint:
+        limits:
+          cpu: 750m
+          ephemeral-storage: 1Gi
+          memory: 1Gi
+        requests:
+          cpu: 100m
+          ephemeral-storage: 500Mi
+          memory: 64Mi
+  eric-pc-up-service-chaining-cm-agent:
+    autoScaling:
+      enabled: false
+    replicaCount: 1
+    resources:
+      serviceChainingCmAgent:
+        limits:
+          cpu: 750m
+          ephemeral-storage: 1Gi
+          memory: 128Mi
+        requests:
+          cpu: 14m
+          ephemeral-storage: 500Mi
+          memory: 64Mi
+  eric-pc-up-timer-wheel:
+    autoScaling:
+      enabled: false
+    replicaCount: 1
+    resources:
+      timerWheel:
+        limits:
+          cpu: 750m
+          ephemeral-storage: 1Gi
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          ephemeral-storage: 500Mi
+          memory: 20Mi
+  eric-pc-up-user-plane-cm-agent:
+    autoScaling:
+      enabled: false
+    replicaCount: 1
+    resources:
+      userPlaneCmAgent:
+        limits:
+          cpu: 750m
+          ephemeral-storage: 1Gi
+          memory: 128Mi
+        requests:
+          cpu: 30m
+          ephemeral-storage: 500Mi
+          memory: 20Mi
+  eric-probe-event-report-broker:
+    replicaCount: 1
+    resources:
+      probeEventReportBroker:
+        limits:
+          cpu: 500m
+          memory: 128Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
